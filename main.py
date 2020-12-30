@@ -15,7 +15,7 @@ BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 client = requests.Session()
 
 
-def path(name: str, host=None) -> str:
+def path(name: str, host=config.host) -> str:
     _path = {
         # Home
         'jury': '/jury',
@@ -35,7 +35,6 @@ def path(name: str, host=None) -> str:
 
     assert name in _path, 'No path found.'
 
-    host = host or config.host
     return f"{host}{_path[name]}"
 
 
@@ -78,14 +77,14 @@ def get_fields(page: str) -> dict:
     return data
 
 
-def login(username=None, password=None):
+def login(username=config.username, password=config.password):
     res = client.get(path('login'))
     res.raise_for_status()
 
     data = {
         **get_fields(res.text),
-        '_username': username or config.username,
-        '_password': password or config.password,
+        '_username': username,
+        '_password': password,
     }
 
     res = client.post(path('login'), data=data)
