@@ -35,7 +35,7 @@ def path(name: str, host=config.host) -> str:
 
     assert name in _path, 'No path found.'
 
-    return f"{host}{_path[name]}"
+    return f'{host}{_path[name]}'
 
 
 def load_users(filepath: str) -> List[Dict[str, str]]:
