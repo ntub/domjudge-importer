@@ -8,7 +8,7 @@ import sys
 
 from bs4 import BeautifulSoup
 
-from typing import List, Dict
+from typing import List, Dict, Callable
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -173,20 +173,39 @@ def ask(text):
     return input(f'{text} [y/N]: ').lower() == 'y'
 
 
+def action_to_message(func: Callable, choice: bool, *args, **kwargs):
+    action_name = func.__name__.replace('_', ' ').capitalize()
+    choice_text = 'yes' if choice else 'no'
+    return f'- {action_name}: {choice_text}'
+
+
+def prepare():
+    actions = [
+        (delete_users, ask('Delete users'), [], {}),
+        (delete_teams, ask('Delete teams'), [], {}),
+    ]
+
+    message = '\n'.join([action_to_message(*action) for action in actions])
+
+    print(f'\nPrepare actions check:\n{message}\n')
+
+    assert ask('Are you sure'), 'You must checked your choices.'
+
+    for func, choice, args, kwargs in actions:
+        if not choice:
+            continue
+
+        func(*args, **kwargs)
+
+
 def main():
     login()
 
-    if ask('Delete users'):
-        delete_users()
-        print('Delete users done.')
-    else:
-        print('Skip delete users')
-
-    if ask('Delete teams'):
-        delete_teams()
-        print('Delete teams done.')
-    else:
-        print('Skip delete teams')
+    try:
+        prepare()
+    except AssertionError as e:
+        print(e)
+        exit(1)
 
     assert len(sys.argv) >= 2, 'No file set.'
 
